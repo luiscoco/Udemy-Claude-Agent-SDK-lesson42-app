@@ -225,7 +225,7 @@ Bind the browser choice to known checkpoint IDs for this run. The selected pre-t
 Source: `src/agent.ts`, selected lines 174–177. Surrounding code omitted.
 
 ```typescript
-const choice = chooseSession(
+const choice = chooseCheckpoint(
           checkpoints.map((p) => p.id),
           controller.signal,
         );

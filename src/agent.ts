@@ -1,6 +1,6 @@
 import { runWorker } from "./host.js";
 import { prepareWorkspace, BUG } from "./workspace.js";
-import { chooseSession } from "./controls.js";
+import { chooseCheckpoint } from "./controls.js";
 import { validateConfig, MODES } from "./modes.js";
 import { SHELL_COMMAND } from "./policy.js";
 import type { WorkerRequest } from "./worker.js";
@@ -162,16 +162,16 @@ export async function runAgent(
       validation.push({ stage: "after recovery", ...(await w.test()) });
     } else if (c.mode === "menu") {
       const catalog: Catalog = {
-        sessions: checkpoints.map((p) => ({ id: p.id, title: p.label })),
+        checkpoints: checkpoints.map((p) => ({ id: p.id, title: p.label })),
         messages: checkpoints.map((p) => ({
-          sessionId: p.id,
+          checkpointId: p.id,
           messages: [{ sessionId: p.sessionId, before: p.before }],
         })),
       };
       emit({ type: "catalog", catalog });
       if (scripted) selectedCheckpointId = checkpoints[1].id;
       else {
-        const choice = chooseSession(
+        const choice = chooseCheckpoint(
           checkpoints.map((p) => p.id),
           controller.signal,
         );
@@ -179,7 +179,7 @@ export async function runAgent(
           type: "choose",
           id: choice.id,
           preferred: checkpoints[1].id,
-          sessions: catalog.sessions,
+          checkpoints: catalog.checkpoints,
         });
         try {
           selectedCheckpointId = await choice.selection;
@@ -201,9 +201,9 @@ export async function runAgent(
           "What exact marker did you write with Edit earlier in this conversation? Reply exactly with that prior marker only. Do not read files or use tools.",
       });
     const catalog: Catalog = {
-      sessions: checkpoints.map((p) => ({ id: p.id, title: p.label })),
+      checkpoints: checkpoints.map((p) => ({ id: p.id, title: p.label })),
       messages: checkpoints.map((p) => ({
-        sessionId: p.id,
+        checkpointId: p.id,
         messages: [{ sessionId: p.sessionId, before: p.before }],
       })),
     };

@@ -9,13 +9,13 @@ const rows: LabEvent[] = [],
   observations: Observation[] = [];
 let capability = "",
   complete = false,
-  catalog: Catalog = { sessions: [], messages: [] };
+  catalog: Catalog = { checkpoints: [], messages: [] };
 function json(id: string, v: unknown) {
   get(id).textContent = JSON.stringify(v, null, 2);
   Prism.highlightElement(get(id));
 }
 function preview() {
-  const entry = catalog.messages.find((s) => s.sessionId === picker.value);
+  const entry = catalog.messages.find((s) => s.checkpointId === picker.value);
   json("messages", entry || {});
 }
 picker.onchange = preview;
@@ -25,7 +25,7 @@ select.onchange = () =>
   const response = await fetch("/api/control", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id: capability, sessionId: picker.value }),
+    body: JSON.stringify({ id: capability, checkpointId: picker.value }),
   });
   get("choice-status").textContent = await response.text();
   if (response.ok) {
@@ -38,9 +38,9 @@ function show(e: LabEvent) {
   if (e.type === "options") json("options", e.options);
   if (e.type === "catalog") {
     catalog = e.catalog;
-    json("catalog", catalog.sessions);
+    json("catalog", catalog.checkpoints);
     picker.replaceChildren();
-    for (const s of catalog.sessions) {
+    for (const s of catalog.checkpoints) {
       const o = document.createElement("option");
       o.value = s.id;
       o.textContent = s.title.slice(0, 80) + " · " + s.id;
@@ -139,7 +139,7 @@ run.onclick = async () => {
   observations.length = 0;
   complete = false;
   capability = "";
-  catalog = { sessions: [], messages: [] };
+  catalog = { checkpoints: [], messages: [] };
   select.replaceChildren();
   picker.replaceChildren();
   get("conversation").replaceChildren();

@@ -5,7 +5,7 @@ import { writeFile } from "node:fs/promises";
 import { prepareWorkspace, BASE, BUG } from "./workspace.js";
 import { allowedTool, SHELL_COMMAND } from "./policy.js";
 import { validateConfig } from "./modes.js";
-import { chooseSession, applyControl } from "./controls.js";
+import { chooseCheckpoint, applyControl } from "./controls.js";
 test("Read and Edit are confined to the classroom files", () => {
   assert.ok(allowedTool("C:/lab", "Read", { file_path: "math.mts" }));
   assert.ok(
@@ -62,18 +62,18 @@ test("arbitrary SDK options and paths are rejected", () => {
     assert.throws(() => validateConfig(v));
 });
 test("restore selection accepts only known checkpoint IDs", async () => {
-  const c = chooseSession(["first", "second"], new AbortController().signal);
-  assert.throws(() => applyControl({ id: c.id, sessionId: "other" }));
-  assert.ok(applyControl({ id: c.id, sessionId: "second" }));
+  const c = chooseCheckpoint(["first", "second"], new AbortController().signal);
+  assert.throws(() => applyControl({ id: c.id, checkpointId: "other" }));
+  assert.ok(applyControl({ id: c.id, checkpointId: "second" }));
   assert.equal(await c.selection, "second");
-  assert.equal(applyControl({ id: c.id, sessionId: "second" }), false);
+  assert.equal(applyControl({ id: c.id, checkpointId: "second" }), false);
 });
 test("cancelled restore selection is removed", async () => {
   const ac = new AbortController(),
-    c = chooseSession(["first"], ac.signal);
+    c = chooseCheckpoint(["first"], ac.signal);
   ac.abort();
   await assert.rejects(c.selection);
-  assert.equal(applyControl({ id: c.id, sessionId: "first" }), false);
+  assert.equal(applyControl({ id: c.id, checkpointId: "first" }), false);
 });
 test("the real fixture test detects a bug and passes after recovery", async () => {
   const w = await prepareWorkspace();

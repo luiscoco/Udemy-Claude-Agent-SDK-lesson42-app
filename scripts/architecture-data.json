@@ -161,7 +161,7 @@
       "anchors": [
         "if (type === \"checkpoint\")"
       ],
-      "sourceSHA256": "6567568f824be814026af7e57c26a06a9f9a1d4b7ed5cd81e58f7555a290b72f",
+      "sourceSHA256": "e0b734b80106625089c81e591bfd92106c827eaf8c4f5094acd790e3dbbbf5fa",
       "narration": "Step 6. The host labels native checkpoint IDs and stores independently read pre-turn snapshots for teaching. SDK backups, rather than host snapshots, perform restoration. This source excerpt shows the corresponding application statement."
     },
     {
@@ -221,22 +221,22 @@
       "anchors": [
         "const failed = await w.test();"
       ],
-      "sourceSHA256": "6567568f824be814026af7e57c26a06a9f9a1d4b7ed5cd81e58f7555a290b72f",
+      "sourceSHA256": "e0b734b80106625089c81e591bfd92106c827eaf8c4f5094acd790e3dbbbf5fa",
       "narration": "Step 10. Run the real Node test against the agent-written bug. A failure triggers SDK rewind, followed by another real test run. This source excerpt shows the corresponding application statement."
     },
     {
       "number": 11,
       "title": "Choose one known restore point",
       "source": "src/agent.ts",
-      "code": "const choice = chooseSession(\n          checkpoints.map((p) => p.id),\n          controller.signal,\n        );",
+      "code": "const choice = chooseCheckpoint(\n          checkpoints.map((p) => p.id),\n          controller.signal,\n        );",
       "language": "typescript",
       "explanation": "Bind the browser choice to known checkpoint IDs for this run. The selected pre-turn state determines which later edits are undone.",
       "firstLine": 174,
       "lastLine": 177,
       "anchors": [
-        "const choice = chooseSession("
+        "const choice = chooseCheckpoint("
       ],
-      "sourceSHA256": "6567568f824be814026af7e57c26a06a9f9a1d4b7ed5cd81e58f7555a290b72f",
+      "sourceSHA256": "e0b734b80106625089c81e591bfd92106c827eaf8c4f5094acd790e3dbbbf5fa",
       "narration": "Step 11. Bind the browser choice to known checkpoint IDs for this run. The selected pre-turn state determines which later edits are undone. This source excerpt shows the corresponding application statement."
     },
     {
@@ -251,7 +251,7 @@
       "anchors": [
         "const saved = await w.saveIds({ sessionId: id, checkpointId: first.id });"
       ],
-      "sourceSHA256": "6567568f824be814026af7e57c26a06a9f9a1d4b7ed5cd81e58f7555a290b72f",
+      "sourceSHA256": "e0b734b80106625089c81e591bfd92106c827eaf8c4f5094acd790e3dbbbf5fa",
       "narration": "Step 12. Persist and reload the session/checkpoint pair, then rewind in a later worker. Local SDK history and backups remain available. This source excerpt shows the corresponding application statement."
     },
     {
@@ -266,7 +266,7 @@
       "anchors": [
         "if (c.mode === \"history\")"
       ],
-      "sourceSHA256": "6567568f824be814026af7e57c26a06a9f9a1d4b7ed5cd81e58f7555a290b72f",
+      "sourceSHA256": "e0b734b80106625089c81e591bfd92106c827eaf8c4f5094acd790e3dbbbf5fa",
       "narration": "Step 13. After files are restored, resume the same conversation and recall the previously written marker without reading the file. File restoration does not erase that history. This source excerpt shows the corresponding application statement."
     }
   ]

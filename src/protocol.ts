@@ -29,8 +29,8 @@ export interface Observation {
   detail: unknown;
 }
 export interface Catalog {
-  sessions: { id: string; title: string }[];
-  messages: { sessionId: string; messages: unknown[] }[];
+  checkpoints: { id: string; title: string }[];
+  messages: { checkpointId: string; messages: unknown[] }[];
 }
 export interface Checkpoint {
   id: string;
@@ -62,7 +62,7 @@ export type LabEvent =
       type: "choose";
       id: string;
       preferred: string;
-      sessions: Catalog["sessions"];
+      checkpoints: Catalog["checkpoints"];
     }
   | { type: "answer"; text: string }
   | ({ type: "evidence" } & Evidence)
