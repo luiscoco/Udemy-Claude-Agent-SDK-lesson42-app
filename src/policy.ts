@@ -1,6 +1,20 @@
 import { resolve } from "node:path";
 import { BUG } from "./workspace.js";
 export const SHELL_COMMAND = "printf 'SHELL-42' > untracked.txt";
+export function safeShellTarget(cwd: string, value: unknown) {
+  const i = value as { command?: unknown };
+  if (!i || typeof i.command !== "string") return false;
+  if (i.command === SHELL_COMMAND) return true;
+  const prefix = "printf 'SHELL-42' > ";
+  if (!i.command.startsWith(prefix)) return false;
+  let path = i.command.slice(prefix.length).trim();
+  if (
+    (path.startsWith('"') && path.endsWith('"')) ||
+    (path.startsWith("'") && path.endsWith("'"))
+  )
+    path = path.slice(1, -1);
+  return resolve(cwd, path) === resolve(cwd, "untracked.txt");
+}
 export function allowedTool(
   cwd: string,
   name: string,
@@ -9,7 +23,7 @@ export function allowedTool(
 ) {
   if (!value || typeof value !== "object") return false;
   const i = value as Record<string, unknown>;
-  if (name === "Bash") return allowShell && i.command === SHELL_COMMAND;
+  if (name === "Bash") return allowShell && safeShellTarget(cwd, i);
   if (typeof i.file_path !== "string") return false;
   const file = resolve(cwd, i.file_path),
     main = resolve(cwd, "math.mts"),

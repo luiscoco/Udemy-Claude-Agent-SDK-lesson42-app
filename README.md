@@ -126,7 +126,7 @@ enableFileCheckpointing: true,
 
 Only the fixed fixtures can be read or edited. The shell demonstration needs its explicit exact-command capability; arbitrary tools and paths are rejected.
 
-Source: `src/policy.ts`, selected lines 17–25. Surrounding code omitted.
+Source: `src/policy.ts`, selected lines 31–39. Surrounding code omitted.
 
 ```typescript
 if (name === "Read")
@@ -144,7 +144,7 @@ if (name === "Read")
 
 Capture the actual replayed user-message UUID once per query, paired with its actual SDK session ID.
 
-Source: `src/worker.ts`, selected lines 95–98. Surrounding code omitted.
+Source: `src/worker.ts`, selected lines 119–122. Surrounding code omitted.
 
 ```typescript
 if (message.type === "user" && message.uuid && !captured) {
@@ -168,7 +168,7 @@ if (type === "checkpoint")
 
 Use an empty prompt with resume and checkpointing enabled. The control operation runs in a new actual SDK worker.
 
-Source: `src/worker.ts`, selected lines 77–80. Surrounding code omitted.
+Source: `src/worker.ts`, selected lines 92–95. Surrounding code omitted.
 
 ```typescript
 const active = query({
@@ -181,7 +181,7 @@ const active = query({
 
 Capture the native dry-run result. Preview must not change current file bytes or remove newly created files.
 
-Source: `src/worker.ts`, selected lines 85–88. Surrounding code omitted.
+Source: `src/worker.ts`, selected lines 100–103. Surrounding code omitted.
 
 ```typescript
 const preview = await active.rewindFiles(request.checkpoint!, {
@@ -194,14 +194,14 @@ const preview = await active.rewindFiles(request.checkpoint!, {
 
 Only apply when requested and the native preview allows it. Capture native canRewind and skippedLinks data; inspect actual files afterward.
 
-Source: `src/worker.ts`, selected lines 89–93. Surrounding code omitted.
+Source: `src/worker.ts`, selected lines 107–111. Surrounding code omitted.
 
 ```typescript
-if (!request.dryRun && preview.canRewind) {
-        const result = await active.rewindFiles(request.checkpoint!);
-        send("rewind-applied", result);
-      }
-      break;
+const result = await active.rewindFiles(request.checkpoint!);
+            send("rewind-applied", { ...result, attempt });
+            break;
+          } catch (error) {
+            if (attempt === 3) throw error;
 ```
 
 ### 10. Recover when validation fails

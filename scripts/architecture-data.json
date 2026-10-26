@@ -116,7 +116,7 @@
       "anchors": [
         "enableFileCheckpointing: true,"
       ],
-      "sourceSHA256": "a8ee5073358317ffd997773fce7bd99a2a8a326b423cf46ec31c118e02b6192e",
+      "sourceSHA256": "debd3bb01306a4409dbf0e7335b1af00457dfd12a893b7b89bf89b7b4708c7ea",
       "narration": "Step 3. Enable SDK checkpointing and replay-user-messages. acceptEdits is constrained by a guard to fixed classroom paths and bounded inputs. This source excerpt shows the corresponding application statement."
     },
     {
@@ -126,12 +126,12 @@
       "code": "if (name === \"Read\")\n    return [main, note, resolve(cwd, \"untracked.txt\")].includes(file);\n  if (name === \"Edit\")\n    return (\n      file === main &&\n      typeof i.old_string === \"string\" &&\n      typeof i.new_string === \"string\" &&\n      i.old_string.length <= 200 &&\n      i.new_string.length <= 200 &&",
       "language": "typescript",
       "explanation": "Only the fixed fixtures can be read or edited. The shell demonstration needs its explicit exact-command capability; arbitrary tools and paths are rejected.",
-      "firstLine": 17,
-      "lastLine": 25,
+      "firstLine": 31,
+      "lastLine": 39,
       "anchors": [
         "if (name === \"Read\")"
       ],
-      "sourceSHA256": "81bc8a24b7e72165a611a54d2543cc1a577d1e9c28e8a91df571c0c78418fa76",
+      "sourceSHA256": "4b496b7eff4ed99ba559cd929bb30f31a156b002f429e995acc1941464176722",
       "narration": "Step 4. Only the fixed fixtures can be read or edited. The shell demonstration needs its explicit exact-command capability; arbitrary tools and paths are rejected. This source excerpt shows the corresponding application statement."
     },
     {
@@ -141,12 +141,12 @@
       "code": "if (message.type === \"user\" && message.uuid && !captured) {\n      captured = true;\n      send(\"checkpoint\", { id: message.uuid, sessionId: message.session_id });\n    }",
       "language": "typescript",
       "explanation": "Capture the actual replayed user-message UUID once per query, paired with its actual SDK session ID.",
-      "firstLine": 95,
-      "lastLine": 98,
+      "firstLine": 119,
+      "lastLine": 122,
       "anchors": [
         "if (message.type === \"user\" && message.uuid && !captured) {"
       ],
-      "sourceSHA256": "a8ee5073358317ffd997773fce7bd99a2a8a326b423cf46ec31c118e02b6192e",
+      "sourceSHA256": "debd3bb01306a4409dbf0e7335b1af00457dfd12a893b7b89bf89b7b4708c7ea",
       "narration": "Step 5. Capture the actual replayed user-message UUID once per query, paired with its actual SDK session ID. This source excerpt shows the corresponding application statement."
     },
     {
@@ -171,12 +171,12 @@
       "code": "const active = query({\n    prompt: request.kind === \"rewind\" ? \"\" : request.prompt!,\n    options,\n  });",
       "language": "typescript",
       "explanation": "Use an empty prompt with resume and checkpointing enabled. The control operation runs in a new actual SDK worker.",
-      "firstLine": 77,
-      "lastLine": 80,
+      "firstLine": 92,
+      "lastLine": 95,
       "anchors": [
         "const active = query({"
       ],
-      "sourceSHA256": "a8ee5073358317ffd997773fce7bd99a2a8a326b423cf46ec31c118e02b6192e",
+      "sourceSHA256": "debd3bb01306a4409dbf0e7335b1af00457dfd12a893b7b89bf89b7b4708c7ea",
       "narration": "Step 7. Use an empty prompt with resume and checkpointing enabled. The control operation runs in a new actual SDK worker. This source excerpt shows the corresponding application statement."
     },
     {
@@ -186,27 +186,27 @@
       "code": "const preview = await active.rewindFiles(request.checkpoint!, {\n        dryRun: true,\n      });\n      send(\"rewind-preview\", preview);",
       "language": "typescript",
       "explanation": "Capture the native dry-run result. Preview must not change current file bytes or remove newly created files.",
-      "firstLine": 85,
-      "lastLine": 88,
+      "firstLine": 100,
+      "lastLine": 103,
       "anchors": [
         "const preview = await active.rewindFiles(request.checkpoint!, {"
       ],
-      "sourceSHA256": "a8ee5073358317ffd997773fce7bd99a2a8a326b423cf46ec31c118e02b6192e",
+      "sourceSHA256": "debd3bb01306a4409dbf0e7335b1af00457dfd12a893b7b89bf89b7b4708c7ea",
       "narration": "Step 8. Capture the native dry-run result. Preview must not change current file bytes or remove newly created files. This source excerpt shows the corresponding application statement."
     },
     {
       "number": 9,
       "title": "Apply real rewind",
       "source": "src/worker.ts",
-      "code": "if (!request.dryRun && preview.canRewind) {\n        const result = await active.rewindFiles(request.checkpoint!);\n        send(\"rewind-applied\", result);\n      }\n      break;",
+      "code": "const result = await active.rewindFiles(request.checkpoint!);\n            send(\"rewind-applied\", { ...result, attempt });\n            break;\n          } catch (error) {\n            if (attempt === 3) throw error;",
       "language": "typescript",
       "explanation": "Only apply when requested and the native preview allows it. Capture native canRewind and skippedLinks data; inspect actual files afterward.",
-      "firstLine": 89,
-      "lastLine": 93,
+      "firstLine": 107,
+      "lastLine": 111,
       "anchors": [
-        "if (!request.dryRun && preview.canRewind) {"
+        "const result = await active.rewindFiles(request.checkpoint!);"
       ],
-      "sourceSHA256": "a8ee5073358317ffd997773fce7bd99a2a8a326b423cf46ec31c118e02b6192e",
+      "sourceSHA256": "debd3bb01306a4409dbf0e7335b1af00457dfd12a893b7b89bf89b7b4708c7ea",
       "narration": "Step 9. Only apply when requested and the native preview allows it. Capture native canRewind and skippedLinks data; inspect actual files afterward. This source excerpt shows the corresponding application statement."
     },
     {

@@ -110,3 +110,22 @@ test("restore manifest reload preserves the session-checkpoint pair", async () =
     await w.cleanup();
   }
 });
+
+test("equivalent own-file shell target is bounded before canonical execution", () => {
+  assert.ok(
+    allowedTool(
+      "C:/lab",
+      "Bash",
+      { command: `printf 'SHELL-42' > "C:/lab/untracked.txt"` },
+      true,
+    ),
+  );
+  assert.ok(
+    !allowedTool(
+      "C:/lab",
+      "Bash",
+      { command: `printf 'SHELL-42' > "C:/outside.txt"` },
+      true,
+    ),
+  );
+});

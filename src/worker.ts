@@ -1,6 +1,6 @@
 import { query, type Options } from "@anthropic-ai/claude-agent-sdk";
 import { createInterface } from "node:readline";
-import { allowedTool } from "./policy.js";
+import { allowedTool, safeShellTarget, SHELL_COMMAND } from "./policy.js";
 export interface WorkerRequest {
   kind: "query" | "rewind";
   cwd: string;
@@ -50,6 +50,21 @@ const options: Options = {
           async (i) => {
             if (i.hook_event_name !== "PreToolUse") return {};
             if (
+              i.tool_name === "Bash" &&
+              request.allowShell &&
+              safeShellTarget(request.cwd, i.tool_input)
+            )
+              return {
+                hookSpecificOutput: {
+                  hookEventName: "PreToolUse",
+                  permissionDecision: "allow",
+                  updatedInput: {
+                    ...(i.tool_input as object),
+                    command: SHELL_COMMAND,
+                  },
+                },
+              };
+            if (
               allowedTool(
                 request.cwd,
                 i.tool_name,
@@ -87,8 +102,17 @@ try {
       });
       send("rewind-preview", preview);
       if (!request.dryRun && preview.canRewind) {
-        const result = await active.rewindFiles(request.checkpoint!);
-        send("rewind-applied", result);
+        for (let attempt = 1; attempt <= 3; attempt++) {
+          try {
+            const result = await active.rewindFiles(request.checkpoint!);
+            send("rewind-applied", { ...result, attempt });
+            break;
+          } catch (error) {
+            if (attempt === 3) throw error;
+            send("rewind-retry", { attempt, error: String(error) });
+            await new Promise((resolve) => setTimeout(resolve, 750));
+          }
+        }
       }
       break;
     }
