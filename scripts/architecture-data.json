@@ -1,0 +1,273 @@
+{
+  "lanes": [
+    "Student UI",
+    "TypeScript host",
+    "SDK worker process",
+    "Local backups",
+    "Project files"
+  ],
+  "arrows": [
+    [
+      0,
+      1,
+      "1. Validate the experiment"
+    ],
+    [
+      1,
+      4,
+      "2. Prepare a disposable TypeScript project"
+    ],
+    [
+      1,
+      2,
+      "3. Enable backups and user replay"
+    ],
+    [
+      2,
+      4,
+      "4. Guard tracked edit tools"
+    ],
+    [
+      2,
+      1,
+      "5. Capture the user checkpoint UUID"
+    ],
+    [
+      1,
+      3,
+      "6. Associate each checkpoint with its pre-turn state"
+    ],
+    [
+      1,
+      2,
+      "7. Open a resumed rewind connection"
+    ],
+    [
+      2,
+      3,
+      "8. Preview restoration without writes"
+    ],
+    [
+      3,
+      4,
+      "9. Apply real rewind"
+    ],
+    [
+      1,
+      2,
+      "10. Recover when validation fails"
+    ],
+    [
+      0,
+      1,
+      "11. Choose one known restore point"
+    ],
+    [
+      1,
+      3,
+      "12. Reload restore identifiers later"
+    ],
+    [
+      1,
+      2,
+      "13. Verify conversation history remains"
+    ]
+  ],
+  "steps": [
+    {
+      "number": 1,
+      "title": "Validate the experiment",
+      "source": "src/modes.ts",
+      "code": "export function validateConfig(value: unknown): RunConfig {\n  const c = value as Record<string, unknown>;\n  if (!c || typeof c !== \"object\" || !MODES.includes(c.mode as never))\n    throw new Error(\"Choose a listed checkpoint experiment.\");\n  if (Object.keys(c).some((k) => k !== \"mode\"))\n    throw new Error(\"Only the classroom mode can be configured.\");\n  return { mode: c.mode as RunConfig[\"mode\"] };",
+      "language": "typescript",
+      "explanation": "Accept only fixed classroom modes. Requests cannot provide arbitrary files, shell commands, resume IDs or checkpoint UUIDs.",
+      "firstLine": 3,
+      "lastLine": 9,
+      "anchors": [
+        "export function validateConfig(value: unknown): RunConfig {"
+      ],
+      "sourceSHA256": "8f8611b8ee4ab24b87161ac925d2ca9d09f9224d166dac339bca1e3628ee58da",
+      "narration": "Step 1. Accept only fixed classroom modes. Requests cannot provide arbitrary files, shell commands, resume IDs or checkpoint UUIDs. This source excerpt shows the corresponding application statement."
+    },
+    {
+      "number": 2,
+      "title": "Prepare a disposable TypeScript project",
+      "source": "src/workspace.ts",
+      "code": "await writeFile(join(cwd, \"math.mts\"), BASE);\n  await writeFile(\n    join(cwd, \"verify.test.mjs\"),\n    'import{test}from\"node:test\";import assert from\"node:assert/strict\";import{add}from\"./math.mts\";test(\"adds 2 and 3\",()=>assert.equal(add(2,3),5));',\n  );\n  async function optional(name: string) {",
+      "language": "typescript",
+      "explanation": "Seed a small TypeScript fixture and a real Node test inside an isolated project, home and SDK config. The original content is independently observed.",
+      "firstLine": 33,
+      "lastLine": 38,
+      "anchors": [
+        "await writeFile(join(cwd, \"math.mts\"), BASE);"
+      ],
+      "sourceSHA256": "2aabc216d7de2cf24f649a7f0575f784d890b3abe432ffe242b3db9b1716d144",
+      "narration": "Step 2. Seed a small TypeScript fixture and a real Node test inside an isolated project, home and SDK config. The original content is independently observed. This source excerpt shows the corresponding application statement."
+    },
+    {
+      "number": 3,
+      "title": "Enable backups and user replay",
+      "source": "src/worker.ts",
+      "code": "enableFileCheckpointing: true,\n  extraArgs: { \"replay-user-messages\": null },\n  permissionMode: \"acceptEdits\",\n  tools: request.allowShell\n    ? [\"Read\", \"Edit\", \"Write\", \"Bash\"]\n    : [\"Read\", \"Edit\", \"Write\"],\n  allowedTools: request.allowShell\n    ? [\"Read\", \"Edit\", \"Write\", \"Bash\"]\n    : [\"Read\", \"Edit\", \"Write\"],",
+      "language": "typescript",
+      "explanation": "Enable SDK checkpointing and replay-user-messages. acceptEdits is constrained by a guard to fixed classroom paths and bounded inputs.",
+      "firstLine": 24,
+      "lastLine": 32,
+      "anchors": [
+        "enableFileCheckpointing: true,"
+      ],
+      "sourceSHA256": "a8ee5073358317ffd997773fce7bd99a2a8a326b423cf46ec31c118e02b6192e",
+      "narration": "Step 3. Enable SDK checkpointing and replay-user-messages. acceptEdits is constrained by a guard to fixed classroom paths and bounded inputs. This source excerpt shows the corresponding application statement."
+    },
+    {
+      "number": 4,
+      "title": "Guard tracked edit tools",
+      "source": "src/policy.ts",
+      "code": "if (name === \"Read\")\n    return [main, note, resolve(cwd, \"untracked.txt\")].includes(file);\n  if (name === \"Edit\")\n    return (\n      file === main &&\n      typeof i.old_string === \"string\" &&\n      typeof i.new_string === \"string\" &&\n      i.old_string.length <= 200 &&\n      i.new_string.length <= 200 &&",
+      "language": "typescript",
+      "explanation": "Only the fixed fixtures can be read or edited. The shell demonstration needs its explicit exact-command capability; arbitrary tools and paths are rejected.",
+      "firstLine": 17,
+      "lastLine": 25,
+      "anchors": [
+        "if (name === \"Read\")"
+      ],
+      "sourceSHA256": "81bc8a24b7e72165a611a54d2543cc1a577d1e9c28e8a91df571c0c78418fa76",
+      "narration": "Step 4. Only the fixed fixtures can be read or edited. The shell demonstration needs its explicit exact-command capability; arbitrary tools and paths are rejected. This source excerpt shows the corresponding application statement."
+    },
+    {
+      "number": 5,
+      "title": "Capture the user checkpoint UUID",
+      "source": "src/worker.ts",
+      "code": "if (message.type === \"user\" && message.uuid && !captured) {\n      captured = true;\n      send(\"checkpoint\", { id: message.uuid, sessionId: message.session_id });\n    }",
+      "language": "typescript",
+      "explanation": "Capture the actual replayed user-message UUID once per query, paired with its actual SDK session ID.",
+      "firstLine": 95,
+      "lastLine": 98,
+      "anchors": [
+        "if (message.type === \"user\" && message.uuid && !captured) {"
+      ],
+      "sourceSHA256": "a8ee5073358317ffd997773fce7bd99a2a8a326b423cf46ec31c118e02b6192e",
+      "narration": "Step 5. Capture the actual replayed user-message UUID once per query, paired with its actual SDK session ID. This source excerpt shows the corresponding application statement."
+    },
+    {
+      "number": 6,
+      "title": "Associate each checkpoint with its pre-turn state",
+      "source": "src/agent.ts",
+      "code": "if (type === \"checkpoint\")\n          checkpoints.push({ ...data, label, before: snapshot });\n        if (type === \"answer\") emit({ type: \"answer\", text: redact(data) });\n        if (type === \"exception\") exceptions.push(redact(data));\n        if (type.startsWith(\"rewind-\"))",
+      "language": "typescript",
+      "explanation": "The host labels native checkpoint IDs and stores independently read pre-turn snapshots for teaching. SDK backups, rather than host snapshots, perform restoration.",
+      "firstLine": 85,
+      "lastLine": 89,
+      "anchors": [
+        "if (type === \"checkpoint\")"
+      ],
+      "sourceSHA256": "6567568f824be814026af7e57c26a06a9f9a1d4b7ed5cd81e58f7555a290b72f",
+      "narration": "Step 6. The host labels native checkpoint IDs and stores independently read pre-turn snapshots for teaching. SDK backups, rather than host snapshots, perform restoration. This source excerpt shows the corresponding application statement."
+    },
+    {
+      "number": 7,
+      "title": "Open a resumed rewind connection",
+      "source": "src/worker.ts",
+      "code": "const active = query({\n    prompt: request.kind === \"rewind\" ? \"\" : request.prompt!,\n    options,\n  });\n  for await (const message of active) {\n    if (message.type === \"system\" && message.subtype === \"init\")",
+      "language": "typescript",
+      "explanation": "Use an empty prompt with resume and checkpointing enabled. The control operation runs in a new actual SDK worker.",
+      "firstLine": 77,
+      "lastLine": 82,
+      "anchors": [
+        "const active = query({"
+      ],
+      "sourceSHA256": "a8ee5073358317ffd997773fce7bd99a2a8a326b423cf46ec31c118e02b6192e",
+      "narration": "Step 7. Use an empty prompt with resume and checkpointing enabled. The control operation runs in a new actual SDK worker. This source excerpt shows the corresponding application statement."
+    },
+    {
+      "number": 8,
+      "title": "Preview restoration without writes",
+      "source": "src/worker.ts",
+      "code": "const preview = await active.rewindFiles(request.checkpoint!, {\n        dryRun: true,\n      });\n      send(\"rewind-preview\", preview);",
+      "language": "typescript",
+      "explanation": "Capture the native dry-run result. Preview must not change current file bytes or remove newly created files.",
+      "firstLine": 85,
+      "lastLine": 88,
+      "anchors": [
+        "const preview = await active.rewindFiles(request.checkpoint!, {"
+      ],
+      "sourceSHA256": "a8ee5073358317ffd997773fce7bd99a2a8a326b423cf46ec31c118e02b6192e",
+      "narration": "Step 8. Capture the native dry-run result. Preview must not change current file bytes or remove newly created files. This source excerpt shows the corresponding application statement."
+    },
+    {
+      "number": 9,
+      "title": "Apply real rewind",
+      "source": "src/worker.ts",
+      "code": "if (!request.dryRun && preview.canRewind) {\n        const result = await active.rewindFiles(request.checkpoint!);\n        send(\"rewind-applied\", result);\n      }\n      break;",
+      "language": "typescript",
+      "explanation": "Only apply when requested and the native preview allows it. Capture native canRewind and skippedLinks data; inspect actual files afterward.",
+      "firstLine": 89,
+      "lastLine": 93,
+      "anchors": [
+        "if (!request.dryRun && preview.canRewind) {"
+      ],
+      "sourceSHA256": "a8ee5073358317ffd997773fce7bd99a2a8a326b423cf46ec31c118e02b6192e",
+      "narration": "Step 9. Only apply when requested and the native preview allows it. Capture native canRewind and skippedLinks data; inspect actual files afterward. This source excerpt shows the corresponding application statement."
+    },
+    {
+      "number": 10,
+      "title": "Recover when validation fails",
+      "source": "src/agent.ts",
+      "code": "const failed = await w.test();\n      validation.push({ stage: \"after edit\", ...failed });\n      observe(\"validation\", failed);\n      if (!failed.passed) await rewind(id, first.id);\n      validation.push({ stage: \"after recovery\", ...(await w.test()) });",
+      "language": "typescript",
+      "explanation": "Run the real Node test against the agent-written bug. A failure triggers SDK rewind, followed by another real test run.",
+      "firstLine": 158,
+      "lastLine": 162,
+      "anchors": [
+        "const failed = await w.test();"
+      ],
+      "sourceSHA256": "6567568f824be814026af7e57c26a06a9f9a1d4b7ed5cd81e58f7555a290b72f",
+      "narration": "Step 10. Run the real Node test against the agent-written bug. A failure triggers SDK rewind, followed by another real test run. This source excerpt shows the corresponding application statement."
+    },
+    {
+      "number": 11,
+      "title": "Choose one known restore point",
+      "source": "src/agent.ts",
+      "code": "const choice = chooseSession(\n          checkpoints.map((p) => p.id),\n          controller.signal,\n        );\n        emit({\n          type: \"choose\",\n          id: choice.id,\n          preferred: checkpoints[1].id,",
+      "language": "typescript",
+      "explanation": "Bind the browser choice to known checkpoint IDs for this run. The selected pre-turn state determines which later edits are undone.",
+      "firstLine": 174,
+      "lastLine": 181,
+      "anchors": [
+        "const choice = chooseSession("
+      ],
+      "sourceSHA256": "6567568f824be814026af7e57c26a06a9f9a1d4b7ed5cd81e58f7555a290b72f",
+      "narration": "Step 11. Bind the browser choice to known checkpoint IDs for this run. The selected pre-turn state determines which later edits are undone. This source excerpt shows the corresponding application statement."
+    },
+    {
+      "number": 12,
+      "title": "Reload restore identifiers later",
+      "source": "src/agent.ts",
+      "code": "const saved = await w.saveIds({ sessionId: id, checkpointId: first.id });\n      observe(\"restore-manifest-reloaded\", saved);\n      await rewind(saved.sessionId, saved.checkpointId);",
+      "language": "typescript",
+      "explanation": "Persist and reload the session/checkpoint pair, then rewind in a later worker. Local SDK history and backups remain available.",
+      "firstLine": 154,
+      "lastLine": 156,
+      "anchors": [
+        "const saved = await w.saveIds({ sessionId: id, checkpointId: first.id });"
+      ],
+      "sourceSHA256": "6567568f824be814026af7e57c26a06a9f9a1d4b7ed5cd81e58f7555a290b72f",
+      "narration": "Step 12. Persist and reload the session/checkpoint pair, then rewind in a later worker. Local SDK history and backups remain available. This source excerpt shows the corresponding application statement."
+    },
+    {
+      "number": 13,
+      "title": "Verify conversation history remains",
+      "source": "src/agent.ts",
+      "code": "if (c.mode === \"history\")\n      await call(\"Recall prior edit after rewind\", {\n        resume: id,\n        prompt:\n          \"What exact marker did you write with Edit earlier in this conversation? Reply exactly with that prior marker only. Do not read files or use tools.\",\n      });",
+      "language": "typescript",
+      "explanation": "After files are restored, resume the same conversation and recall the previously written marker without reading the file. File restoration does not erase that history.",
+      "firstLine": 197,
+      "lastLine": 202,
+      "anchors": [
+        "if (c.mode === \"history\")"
+      ],
+      "sourceSHA256": "6567568f824be814026af7e57c26a06a9f9a1d4b7ed5cd81e58f7555a290b72f",
+      "narration": "Step 13. After files are restored, resume the same conversation and recall the previously written marker without reading the file. File restoration does not erase that history. This source excerpt shows the corresponding application statement."
+    }
+  ]
+}
