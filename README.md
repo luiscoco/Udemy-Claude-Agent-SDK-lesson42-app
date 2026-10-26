@@ -94,7 +94,7 @@ export function validateConfig(value: unknown): RunConfig {
 
 Seed a small TypeScript fixture and a real Node test inside an isolated project, home and SDK config. The original content is independently observed.
 
-Source: `src/workspace.ts`, selected lines 33–38. Surrounding code omitted.
+Source: `src/workspace.ts`, selected lines 33–37. Surrounding code omitted.
 
 ```typescript
 await writeFile(join(cwd, "math.mts"), BASE);
@@ -102,7 +102,6 @@ await writeFile(join(cwd, "math.mts"), BASE);
     join(cwd, "verify.test.mjs"),
     'import{test}from"node:test";import assert from"node:assert/strict";import{add}from"./math.mts";test("adds 2 and 3",()=>assert.equal(add(2,3),5));',
   );
-  async function optional(name: string) {
 ```
 
 ### 3. Enable backups and user replay
@@ -158,29 +157,24 @@ if (message.type === "user" && message.uuid && !captured) {
 
 The host labels native checkpoint IDs and stores independently read pre-turn snapshots for teaching. SDK backups, rather than host snapshots, perform restoration.
 
-Source: `src/agent.ts`, selected lines 85–89. Surrounding code omitted.
+Source: `src/agent.ts`, selected lines 85–86. Surrounding code omitted.
 
 ```typescript
 if (type === "checkpoint")
           checkpoints.push({ ...data, label, before: snapshot });
-        if (type === "answer") emit({ type: "answer", text: redact(data) });
-        if (type === "exception") exceptions.push(redact(data));
-        if (type.startsWith("rewind-"))
 ```
 
 ### 7. Open a resumed rewind connection
 
 Use an empty prompt with resume and checkpointing enabled. The control operation runs in a new actual SDK worker.
 
-Source: `src/worker.ts`, selected lines 77–82. Surrounding code omitted.
+Source: `src/worker.ts`, selected lines 77–80. Surrounding code omitted.
 
 ```typescript
 const active = query({
     prompt: request.kind === "rewind" ? "" : request.prompt!,
     options,
   });
-  for await (const message of active) {
-    if (message.type === "system" && message.subtype === "init")
 ```
 
 ### 8. Preview restoration without writes
@@ -228,17 +222,13 @@ const failed = await w.test();
 
 Bind the browser choice to known checkpoint IDs for this run. The selected pre-turn state determines which later edits are undone.
 
-Source: `src/agent.ts`, selected lines 174–181. Surrounding code omitted.
+Source: `src/agent.ts`, selected lines 174–177. Surrounding code omitted.
 
 ```typescript
 const choice = chooseSession(
           checkpoints.map((p) => p.id),
           controller.signal,
         );
-        emit({
-          type: "choose",
-          id: choice.id,
-          preferred: checkpoints[1].id,
 ```
 
 ### 12. Reload restore identifiers later

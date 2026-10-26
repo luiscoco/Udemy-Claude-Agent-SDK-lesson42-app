@@ -93,11 +93,11 @@
       "number": 2,
       "title": "Prepare a disposable TypeScript project",
       "source": "src/workspace.ts",
-      "code": "await writeFile(join(cwd, \"math.mts\"), BASE);\n  await writeFile(\n    join(cwd, \"verify.test.mjs\"),\n    'import{test}from\"node:test\";import assert from\"node:assert/strict\";import{add}from\"./math.mts\";test(\"adds 2 and 3\",()=>assert.equal(add(2,3),5));',\n  );\n  async function optional(name: string) {",
+      "code": "await writeFile(join(cwd, \"math.mts\"), BASE);\n  await writeFile(\n    join(cwd, \"verify.test.mjs\"),\n    'import{test}from\"node:test\";import assert from\"node:assert/strict\";import{add}from\"./math.mts\";test(\"adds 2 and 3\",()=>assert.equal(add(2,3),5));',\n  );",
       "language": "typescript",
       "explanation": "Seed a small TypeScript fixture and a real Node test inside an isolated project, home and SDK config. The original content is independently observed.",
       "firstLine": 33,
-      "lastLine": 38,
+      "lastLine": 37,
       "anchors": [
         "await writeFile(join(cwd, \"math.mts\"), BASE);"
       ],
@@ -153,11 +153,11 @@
       "number": 6,
       "title": "Associate each checkpoint with its pre-turn state",
       "source": "src/agent.ts",
-      "code": "if (type === \"checkpoint\")\n          checkpoints.push({ ...data, label, before: snapshot });\n        if (type === \"answer\") emit({ type: \"answer\", text: redact(data) });\n        if (type === \"exception\") exceptions.push(redact(data));\n        if (type.startsWith(\"rewind-\"))",
+      "code": "if (type === \"checkpoint\")\n          checkpoints.push({ ...data, label, before: snapshot });",
       "language": "typescript",
       "explanation": "The host labels native checkpoint IDs and stores independently read pre-turn snapshots for teaching. SDK backups, rather than host snapshots, perform restoration.",
       "firstLine": 85,
-      "lastLine": 89,
+      "lastLine": 86,
       "anchors": [
         "if (type === \"checkpoint\")"
       ],
@@ -168,11 +168,11 @@
       "number": 7,
       "title": "Open a resumed rewind connection",
       "source": "src/worker.ts",
-      "code": "const active = query({\n    prompt: request.kind === \"rewind\" ? \"\" : request.prompt!,\n    options,\n  });\n  for await (const message of active) {\n    if (message.type === \"system\" && message.subtype === \"init\")",
+      "code": "const active = query({\n    prompt: request.kind === \"rewind\" ? \"\" : request.prompt!,\n    options,\n  });",
       "language": "typescript",
       "explanation": "Use an empty prompt with resume and checkpointing enabled. The control operation runs in a new actual SDK worker.",
       "firstLine": 77,
-      "lastLine": 82,
+      "lastLine": 80,
       "anchors": [
         "const active = query({"
       ],
@@ -228,11 +228,11 @@
       "number": 11,
       "title": "Choose one known restore point",
       "source": "src/agent.ts",
-      "code": "const choice = chooseSession(\n          checkpoints.map((p) => p.id),\n          controller.signal,\n        );\n        emit({\n          type: \"choose\",\n          id: choice.id,\n          preferred: checkpoints[1].id,",
+      "code": "const choice = chooseSession(\n          checkpoints.map((p) => p.id),\n          controller.signal,\n        );",
       "language": "typescript",
       "explanation": "Bind the browser choice to known checkpoint IDs for this run. The selected pre-turn state determines which later edits are undone.",
       "firstLine": 174,
-      "lastLine": 181,
+      "lastLine": 177,
       "anchors": [
         "const choice = chooseSession("
       ],
